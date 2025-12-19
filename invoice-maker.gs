@@ -6,6 +6,60 @@ function onOpen() {
 }
 
 function showInvoice() {
+  // Month data template
+  var month_data_template = [
+    {month: 'January', period_start: '30 January', period_end: '29 February'},
+    {month: 'February', period_start: '29 February', period_end: '30 March'},
+    {month: 'March', period_start: '30 March', period_end: '30 April'},
+    {month: 'April', period_start: '30 April', period_end: '30 May'},
+    {month: 'May', period_start: '30 May', period_end: '30 June'},
+    {month: 'June', period_start: '30 June', period_end: '30 July'},
+    {month: 'July', period_start: '30 July', period_end: '30 August'},
+    {month: 'August', period_start: '30 August', period_end: '30 September'},
+    {month: 'September', period_start: '30 September', period_end: '30 October'},
+    {month: 'October', period_start: '30 October', period_end: '30 November'},
+    {month: 'November', period_start: '30 November', period_end: '30 December'},
+    {month: 'December', period_start: '30 December', period_end: '30 January'}
+  ];
+  
+  // Get month data from Payments sheet
+  var paymentsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Payments');
+  var month = '';
+  var periodStart = '';
+  var periodEnd = '';
+  
+  if (paymentsSheet) {
+    var paymentsData = paymentsSheet.getDataRange().getValues();
+    var paymentsHeaders = paymentsData[0];
+    var monthCol = paymentsHeaders.indexOf('Month');
+    
+    if (monthCol !== -1) {
+      // Find last row with data
+      var lastRow = -1;
+      for (var i = paymentsData.length - 1; i > 0; i--) {
+        if (paymentsData[i][monthCol] && paymentsData[i][monthCol] !== '') {
+          lastRow = i;
+          break;
+        }
+      }
+      
+      if (lastRow !== -1) {
+        var lastMonth = paymentsData[lastRow][monthCol];
+        
+        // Find current month in template and get next month
+        for (var j = 0; j < month_data_template.length; j++) {
+          if (month_data_template[j].month === lastMonth) {
+            var nextIndex = (j + 1) % month_data_template.length; // Wrap around for December -> January
+            month = month_data_template[nextIndex].month;
+            periodStart = month_data_template[nextIndex].period_start;
+            periodEnd = month_data_template[nextIndex].period_end;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Report');
   
   if (!sheet) {
@@ -105,7 +159,14 @@ function showInvoice() {
   }
   
   // Build invoice text
-  var invoiceText = 'قیمت هر سیت: فول (' + price_full + ') — دولوپر (' + price_dev + ') — کلب (' + price_collab + ')\n\n';
+  var invoiceText = '';
+  
+  // Add subscription details at the beginning if month data is available
+  if (month !== '') {
+    invoiceText += 'جزئیات اشتراک فیگما فاکتور ماه ' + month + ' (از ' + periodStart + ' تا ' + periodEnd + ') به شرح زیر است:\n\n';
+  }
+  
+  invoiceText += 'قیمت هر سیت: فول (<span dir="ltr">$' + price_full + '</span>) — دولوپر (<span dir="ltr">$' + price_dev + '</span>) — کلب (<span dir="ltr">$' + price_collab + '</span>)\n\n';
   
   // Add team information (skip if all counts are zero, otherwise print only non-zero counts)
   for (var i = 0; i < team_name.length; i++) {
@@ -115,7 +176,7 @@ function showInvoice() {
     }
     
     // Build team line with only non-zero counts
-    var teamLine = 'تیم ' + team_name[i] + ' : ';
+    var teamLine = team_name[i] + ': ';
     var parts = [];
     
     if (count_full[i] > 0) {
@@ -136,9 +197,9 @@ function showInvoice() {
   
   // Conditional cost printing
   if (cost_prorated == 0) {
-    invoiceText += 'مجموعا مبلغ نهایی ' + cost_total;
+    invoiceText += 'مجموعا مبلغ نهایی <span dir="ltr">$' + cost_total + '</span>';
   } else if (cost_prorated > 0) {
-    invoiceText += 'مجموعا ' + cost_subtotal + ' بعلاوه ' + cost_prorated + ' هزینه سرشکن ماه قبل، مبلغ نهایی ' + cost_total;
+    invoiceText += 'مجموعا <span dir="ltr">$' + cost_subtotal + '</span> بعلاوه <span dir="ltr">$' + cost_prorated + '</span> هزینه سرشکن ماه قبل، مبلغ نهایی <span dir="ltr">$' + cost_total + '</span>';
   }
   
   // Show modal dialog

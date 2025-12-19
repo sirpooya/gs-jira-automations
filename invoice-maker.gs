@@ -1,7 +1,7 @@
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('📜 Invoice')
-    .addItem('Show Invoice', 'showInvoice')
+    .addItem('Generate Invoice', 'showInvoice')
     .addToUi();
 }
 

@@ -274,8 +274,8 @@ function downloadAsCSV(data) {
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('Jira Exporter')
-    .addItem('Process Selected Rows', 'processSelectedRows')
+  ui.createMenu('😎 Powerups')
+    .addItem('Export Selected Rows to Jira', 'processSelectedRows')
     .addToUi();
 }
 

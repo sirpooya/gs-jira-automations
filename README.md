@@ -30,3 +30,6 @@ Webhook endpoint that updates Google Sheets when Jira issue status changes.
 2. Deploy `webhook-reciever.gs` as a web app (GET access)
 3. Configure Jira webhook to call the deployed URL
 
+
+
+

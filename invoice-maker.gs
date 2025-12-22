@@ -2,6 +2,7 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('📜 Invoice')
     .addItem('Generate Invoice', 'showInvoice')
+    .addItem('Send ticket reminder', 'sendTicketReminder')
     .addToUi();
 }
 
